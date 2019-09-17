@@ -1,0 +1,16 @@
+# VALID OPTIONS:
+# 4 bits, with lower-case u
+1u01
+
+#5 bits, with upper-case U's
+uu111
+
+#8 bits, only 1's and 0's
+11001100
+
+# INVALID OPTIONS:
+#  Using character's not 1's, 0's nor U's
+AAAAAAAA
+23452345
+10U13
+100A1

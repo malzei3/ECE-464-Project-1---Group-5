@@ -1,0 +1,25 @@
+# c17
+# 5 inputs
+# 2 outputs
+# 0 inverter
+# 6 gates ( 6 NANDs )
+
+# INPUTS:
+INPUT(a)
+INPUT(b)
+INPUT(c)
+INPUT(d)
+INPUT(e)
+
+# OUTPUTS:
+OUTPUT(j)
+OUTPUT(k)
+
+# GATES:
+g = NAND(c, d)
+h = NAND(b, g)
+l = NOT(a)
+f = NAND(a, c)
+i = NAND(g, e)
+j = NAND(f, h)
+k = NAND(h, i)
