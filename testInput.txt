@@ -1,0 +1,8 @@
+# test vector file
+# for circuit.bench
+# input.txt
+
+
+010
+111
+110
