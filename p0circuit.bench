@@ -12,13 +12,13 @@ INPUT(1)
 INPUT(2)
 
 # OUTPUTS:
-OUTPUT(I)
+OUTPUT(Y)
 
 # GATES:
 E = NAND(A, J, K)
 F = NAND(B, J, 2)
 G = NAND(C, K, 1)
 H = NAND(D, 2, 1)
-I = NAND(E, F, G, H)
+Y = NAND(E, F, G, H)
 J = NOT(1)
 K = NOT(2)
