@@ -9,6 +9,9 @@ import os
 # 4. basic_sim: the actual simulation
 # 5. main: The main function
 
+#global variables (because I didn't want to make a class)
+inputF = []
+gateFIn = []
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Neatly prints the Circuit Dictionary:
 def printCkt(circuit):
@@ -422,7 +425,8 @@ def basic_sim(circuit):
                     if term == "wire_B":
                         circuit[term][3] = '1'
                 # -------------------------
-
+            print(inputF)
+            print(gateFIn)
             circuit = gateCalc(circuit, curr)
 
             # ERROR Detection if LOGIC does not exist
@@ -448,8 +452,6 @@ def faultSim(faultFile):
     #opening list of faults to check
     faultsList = open(faultFile, "r")
 
-    inputF = []
-    gateFIn = []
     for line in faultsList:
 
         # NOT Reading any empty lines
@@ -615,7 +617,6 @@ def main():
                 output = "NETLIST ERROR: OUTPUT LINE \"" + y + "\" NOT ACCESSED"
                 break
             output = str(circuit[y][3]) + output
-
         print("\n *** Summary of simulation: ")
         print(line + " -> " + output + " written into output file. \n")
         outputFile.write(" -> " + output + "\n")
