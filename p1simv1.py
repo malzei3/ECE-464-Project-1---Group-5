@@ -42,6 +42,7 @@ def netRead(netName):
     gateIn = [] # array of the gate inputs
     inputBits = 0  # the number of inputs needed in this given circuit
     i = 0 # counter used for fault generation (specifically generating the gate input faults)
+    numFault = 0
     # main variable to hold the circuit netlist, this is a dictionary in Python, where:
     # key = wire name; value = a list of attributes of the wire
     circuit = {}
@@ -151,42 +152,41 @@ def netRead(netName):
 # -------------------------------------------------------------------------------------------------------------------- #
     # FUNCTION: Generates full fault list (put this in its own function call?)
     # Still need ask user for a fault list output file
-    outputFile = open("faultlist", "w")
+    outputFile = open("full_f_list.txt", "w")
 
+    outputFile.write("Full SSA fault List" + "\n" + "\n")
     # Creating fault list for inputs
     for x in inputs:
         if (x[0:5] == "wire_"):
             x = x.replace("wire_", "")
             outputFile.write(x + "-SA-0" + "\n")
             outputFile.write(x + "-SA-1" + "\n")
-    # Creating fault list for outputs of all gates
+        numFault += 1
+
+    # Creating fault list for each input and outputs for all gates
     for x in gates:
+        z = 0
+        # Getting rid part of string to leave only line variable
         if (x[0:5] == "wire_"):
             x = x.replace("wire_", "")
             outputFile.write(x + "-SA-0" + "\n")
             outputFile.write(x + "-SA-1" + "\n")
-
-    # Creating fault list for each input for all gates
-    for x in gates:
-        z = 0
-        # Getting rid of part of string to leave only line variable
-        if (x[0:5] == "wire_"):
-            x = x.replace("wire_", "")
-
             # Changing Concatenate into str and getting rid of everything but wire variables
             y = str(gateIn[i])
             y = y.replace("['", "")
             y = y.replace("']", "")
             y = y.replace("', '", "")
             inputNum = (len(y))     # number of variables to consider when going through str
+            numFault += 1
+            numFault = numFault + inputNum
 
             # Taking each input variable and putting it into a SA-0 and SA-1 per gate
             if inputNum > 1:
                 while inputNum >= 1:
                     gateVar = y[z]
                     inputNum -= 1
-                    outputFile.write(gateVar + "-in-" + x + "-SA-0" + "\n")
-                    outputFile.write(gateVar + "-in-" + x + "-SA-1" + "\n")
+                    outputFile.write(x + "-in-" + gateVar + "-SA-0" + "\n")
+                    outputFile.write(x + "-in-" + gateVar + "-SA-1" + "\n")
                     z += 1
 
             else:
@@ -194,6 +194,8 @@ def netRead(netName):
                 outputFile.write(y + "-in-" + x + "-SA-0" + "\n")
                 outputFile.write(y + "-in-" + x + "-SA-1" + "\n")
             i += 1
+    numFault = numFault*2 # multiply by 2 for 2 different fault states
+    outputFile.write("\n" + "Total Fault: " + str(numFault))
 
     outputFile.close()
 # -------------------------------------------------------------------------------------------------------------------- #
