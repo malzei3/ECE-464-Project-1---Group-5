@@ -39,13 +39,13 @@ def netRead(netName):
     inputs = []  # array of the input wires
     outputs = []  # array of the output wires
     gates = []  # array of the gate list
-    gateIn = []
+    gateIn = [] # array of the gate inputs
     inputBits = 0  # the number of inputs needed in this given circuit
-    i = 0
+    i = 0 # counter used for fault generation (specifically generating the gate input faults)
     # main variable to hold the circuit netlist, this is a dictionary in Python, where:
     # key = wire name; value = a list of attributes of the wire
     circuit = {}
-    flist = []
+
     # Reading in the netlist file line by line
     for line in netFile:
 
