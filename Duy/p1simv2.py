@@ -11,7 +11,7 @@ import os
 
 #global variables (because I didn't want to make a class)
 inputF = []
-gateFIn = []
+faultOutput = []
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Neatly prints the Circuit Dictionary:
 def printCkt(circuit):
@@ -386,69 +386,82 @@ def inputRead(circuit, line):
 def basic_sim(circuit):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
-    queue = list(circuit["GATES"][1])
-    i = 1
+    faultCirc = circuit
+    print(faultCirc)
+    foutput = ""
+    for x in inputF:
+        queue = list(circuit["GATES"][1])
+        i = 1
 
-    while True:
-        i -= 1
-        # If there's no more things in queue, done
-        if len(queue) == 0:
-            break
-
-        # Remove the first element of the queue and assign it to a variable for us to use
-        curr = queue[0]
-        queue.remove(curr)
-
-        # initialize a flag, used to check if every terminal has been accessed
-        term_has_value = True
-
-        # Check if the terminals have been accessed
-        for term in circuit[curr][1]:
-            if not circuit[term][2]:
-                term_has_value = False
+        while True:
+            i -= 1
+            # If there's no more things in queue, done
+            if len(queue) == 0:
                 break
 
-        if term_has_value:
-            circuit[curr][2] = True
+            # Remove the first element of the queue and assign it to a variable for us to use
+            curr = queue[0]
+            queue.remove(curr)
 
+            # initialize a flag, used to check if every terminal has been accessed
+            term_has_value = True
+
+            # Check if the terminals have been accessed
             for term in circuit[curr][1]:
-                # ------------------------ debugging purposes
-                print(curr)
-                print(circuit[term])
-                print(term)
-                print(circuit[term][3])
-                # ------------------------
-                if curr == "wire_f":
-                    if term == "wire_B":
-                        circuit[term][3] = '0'
-                elif curr != "wire_f":
-                    if term == "wire_B":
-                        circuit[term][3] = '1'
-                # -------------------------
-            print(inputF)
-            print(gateFIn)
-            circuit = gateCalc(circuit, curr)
+                if not circuit[term][2]:
+                    term_has_value = False
+                    break
 
-            # ERROR Detection if LOGIC does not exist
-            if isinstance(circuit, str):
-                print(circuit)
-                return circuit
+            if term_has_value:
+                circuit[curr][2] = True
 
-            print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
-                0] + " for:")
-            for term in circuit[curr][1]:
-                print(term + " = " + circuit[term][3])
-            print("\nPress Enter to Continue...")
-            input()
+                for term in circuit[curr][1]:
+                    # ------------------------ debugging purposes
 
-        else:
-            # If the terminals have not been accessed yet, append the current node at the end of the queue
-            queue.append(curr)
+                    # ------------------------
+
+                    wireName = x[0]
+                    faultWire = "wire_" + wireName
+                    if curr == faultWire:
+                        if x[1] == '1' or x[1] == '0':
+                            circuit[curr][3] = x[1]
+                            print(x[1])
+                        elif term == "wire_" + x[1]:
+                            print("TRUE")
+                            circuit[term][3] = x[2]
+                            circuit = gateCalc(circuit, curr)
+                    else:
+                        circuit = gateCalc(circuit, curr)
+                    # -------------------------
+
+                # ERROR Detection if LOGIC does not exist
+                if isinstance(circuit, str):
+                    print(circuit)
+                    return circuit
+
+                print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
+                    0] + " for:")
+                for term in circuit[curr][1]:
+                    print(term + " = " + circuit[term][3])
+                print("\nPress Enter to Continue...")
+                input()
+
+            else:
+                # If the terminals have not been accessed yet, append the current node at the end of the queue
+                queue.append(curr)
+        for y in circuit["OUTPUTS"][1]:
+            if not circuit[y][2]:
+                foutput = "NETLIST ERROR: OUTPUT LINE \"" + y + "\" NOT ACCESSED"
+                break
+            faultOutput.append(str(circuit[y][3]) + foutput)
+        print(faultOutput)
+        circuit = faultCirc
+        print(circuit)
 
     return circuit
 
 # -------------------------------------------------------------------------------------------------------------------- #
-def faultSim(faultFile):
+def faultRead(faultFile):
     #opening list of faults to check
     faultsList = open(faultFile, "r")
 
@@ -468,16 +481,27 @@ def faultSim(faultFile):
 
         if (line[1:5] == "-SA-"):
             line = line.replace("-SA-", "")
-            print(line)
             inputF.append(line)
 
         if (line[1:5] == "-IN-"):
             line = line.replace("-IN-","")
             line = line.replace("-SA-","")
-            print(line)
-            gateFIn.append(line)
+            inputF.append(line)
     print(inputF)
-    print(gateFIn)
+    for x in inputF:
+        p = x[0]
+        z = "wire_" + p
+        print(z)
+        if x[1] == '1' or x[1] == '0':
+            w = x[1]
+            print(w)
+        else:
+            w = x[1]
+            w = "wire_" + w
+            print(w)
+            d = x[2]
+            print(d)
+
     return
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Main Function
@@ -516,7 +540,7 @@ def main():
             else:
                 break
 
-    faultSim(faultyCkt)
+    faultRead(faultyCkt)
 
 
     print("\n Reading " + cktFile + " ... \n")
