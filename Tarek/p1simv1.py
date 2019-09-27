@@ -193,14 +193,21 @@ def generateFullFaultList():
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Part 2 from the project
 def faultSimulation():
-    cktFile = SelectBenchFile()
+
+    BenchFile = SelectBenchFile()
+    FaultListFile = SelectFaultListFile()
+    TestVectorFile = SelectTestVectorFile()
 
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Part 3 from the project
 def testVectorSetGeneration():
-    print(hi)
+
+     BenchFile = SelectBenchFile()
+     FaultListFile = SelectFaultListFile()
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: read input bench file
