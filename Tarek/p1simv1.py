@@ -193,7 +193,9 @@ def generateFullFaultList():
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Part 2 from the project
 def faultSimulation():
-    print(hi)
+    cktFile = SelectBenchFile()
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Part 3 from the project
@@ -216,6 +218,50 @@ def SelectBenchFile():
         else:
             cktFile = os.path.join(script_dir, userInput)
             if not os.path.isfile(cktFile):
+                print("File does not exist. \n")
+            else:
+                return userInput
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: input fault list file (default: f_list.txt)
+
+def SelectFaultListFile():
+
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+
+    # Select input file, default is input.txt
+    while True:
+        inputName = "f_list.txt"
+        print("\n Read input fault list file: use " + inputName + "?" + " Enter to accept or type filename: ")
+        userInput = input()
+        if userInput == "":
+
+            break
+        else:
+            inputName = os.path.join(script_dir, userInput)
+            if not os.path.isfile(inputName):
+                print("File does not exist. \n")
+            else:
+                return userInput
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION:  test vector input file (default: input.txt)
+
+def SelectTestVectorFile():
+
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+
+    # Select input file, default is input.txt
+    while True:
+        inputName = "input.txt"
+        print("\n Read input test vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
+        userInput = input()
+        if userInput == "":
+
+            break
+        else:
+            inputName = os.path.join(script_dir, userInput)
+            if not os.path.isfile(inputName):
                 print("File does not exist. \n")
             else:
                 return userInput
