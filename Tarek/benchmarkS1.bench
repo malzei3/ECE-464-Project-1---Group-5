@@ -1,0 +1,16 @@
+# circuit.bench
+# 3 inputs
+# 1 output
+# 5 gates
+
+INPUT(A)
+INPUT(B)
+INPUT(C)
+
+OUTPUT(Q)
+
+f = AND(A, B)
+g = OR(B, C)
+h = AND(C, B)
+K = AND(g, h)
+d = OR(k, f)
