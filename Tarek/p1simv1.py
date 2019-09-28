@@ -121,8 +121,39 @@ def netRead(netName):
 
     return circuit
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Part 1 from the project
+# FUNCTION: Reading in the TV file
+def tvRead(tvName):
+    # Opening the tvName file:
+    tvFile = open(tvName, "r")
+
+    # temporary variables
+    inputs = []  # array of the test vectors
+
+
+    # Reading in the netlist file line by line
+    for line in tvFile:
+
+        # NOT Reading any empty lines
+        if (line == "\n"):
+            continue
+
+        # Removing spaces and newlines
+        line = line.replace(" ", "")
+        line = line.replace("\n", "")
+
+        # NOT Reading any comments
+        if (line[0] == "#"):
+            continue
+        
+        inputs.append(line)
+
+    return inputs
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Generates full fault list 
+
 def generateFullFaultList():
 
     i = 0 # counter used for fault generation (specifically generating the gate input faults)
@@ -131,9 +162,6 @@ def generateFullFaultList():
     print("\n Reading " + cktFile + " ... \n")
     circuit = netRead(cktFile)
 
-    # -------------------------------------------------------------------------------------------------------------------- #
-    # FUNCTION: Generates full fault list (put this in its own function call?)
-    # Still need ask user for a fault list output file
     outputFile = open("full_f_list.txt", "w")
 
     outputFile.write("Full SSA fault List" + "\n" + "\n")
@@ -198,6 +226,19 @@ def faultSimulation():
     FaultListFile = SelectFaultListFile()
     TestVectorFile = SelectTestVectorFile()
 
+    print("\n Reading " + BenchFile + " ... \n")
+    circuit = netRead(BenchFile)
+
+    print("\n Reading " + TestVectorFile + " ... \n")
+    tests = tvRead(TestVectorFile)
+
+    outputFile = open("fault_sim_result.txt", "w")
+    outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n")
+
+
+
+
+
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -206,6 +247,14 @@ def testVectorSetGeneration():
 
      BenchFile = SelectBenchFile()
      FaultListFile = SelectFaultListFile()
+
+     print("\n Reading " + BenchFile + " ... \n")
+     circuit = netRead(BenchFile)
+
+     outputFile = open(" tv_set.txt", "w")
+     outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "for " + BenchFile + "\n# " + FaultListFile + "\n\n")
+
+
 
 
 
@@ -254,6 +303,7 @@ def SelectFaultListFile():
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION:  test vector input file (default: input.txt)
 
+
 def SelectTestVectorFile():
 
     script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
@@ -272,6 +322,178 @@ def SelectTestVectorFile():
                 print("File does not exist. \n")
             else:
                 return userInput
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: calculates the output value for each logic gate
+def gateCalc(circuit, node):
+    
+    # terminal will contain all the input wires of this logic gate (node)
+    terminals = list(circuit[node][1])  
+
+    # If the node is an Inverter gate output, solve and return the output
+    if circuit[node][0] == "NOT":
+        if circuit[terminals[0]][3] == '0':
+            circuit[node][3] = '1'
+        elif circuit[terminals[0]][3] == '1':
+            circuit[node][3] = '0'
+        elif circuit[terminals[0]][3] == "U":
+            circuit[node][3] = "U"
+        else:  # Should not be able to come here
+            return -1
+        return circuit
+
+    # If the node is an AND gate output, solve and return the output
+    elif circuit[node][0] == "AND":
+        # Initialize the output to 1
+        circuit[node][3] = '1'
+        # Initialize also a flag that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 0 at any input terminal, AND output is 0. If there is an unknown terminal, mark the flag
+        # Otherwise, keep it at 1
+        for term in terminals:  
+            if circuit[term][3] == '0':
+                circuit[node][3] = '0'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+
+        if unknownTerm:
+            if circuit[node][3] == '1':
+                circuit[node][3] = "U"
+        return circuit
+
+    # If the node is a NAND gate output, solve and return the output
+    elif circuit[node][0] == "NAND":
+        # Initialize the output to 0
+        circuit[node][3] = '0'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 0 terminal, NAND changes the output to 1. If there is an unknown terminal, it
+        # changes to "U" Otherwise, keep it at 0
+        for term in terminals:
+            if circuit[term][3] == '0':
+                circuit[node][3] = '1'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+                break
+
+        if unknownTerm:
+            if circuit[node][3] == '0':
+                circuit[node][3] = "U"
+        return circuit
+
+    # If the node is an OR gate output, solve and return the output
+    elif circuit[node][0] == "OR":
+        # Initialize the output to 0
+        circuit[node][3] = '0'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 1 terminal, OR changes the output to 1. Otherwise, keep it at 0
+        for term in terminals:
+            if circuit[term][3] == '1':
+                circuit[node][3] = '1'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+
+        if unknownTerm:
+            if circuit[node][3] == '0':
+                circuit[node][3] = "U"
+        return circuit
+
+    # If the node is an NOR gate output, solve and return the output
+    if circuit[node][0] == "NOR":
+        # Initialize the output to 1
+        circuit[node][3] = '1'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 1 terminal, NOR changes the output to 0. Otherwise, keep it at 1
+        for term in terminals:
+            if circuit[term][3] == '1':
+                circuit[node][3] = '0'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+        if unknownTerm:
+            if circuit[node][3] == '1':
+                circuit[node][3] = "U"
+        return circuit
+
+    # If the node is an XOR gate output, solve and return the output
+    if circuit[node][0] == "XOR":
+        # Initialize a variable to zero, to count how many 1's in the terms
+        count = 0
+
+        # if there are an odd number of terminals, XOR outputs 1. Otherwise, it should output 0
+        for term in terminals:
+            if circuit[term][3] == '1':
+                count += 1  # For each 1 bit, add one count
+            if circuit[term][3] == "U":
+                circuit[node][3] = "U"
+                return circuit
+
+        # check how many 1's we counted
+        if count % 2 == 1:  # if more than one 1, we know it's going to be 0.
+            circuit[node][3] = '1'
+        else:  # Otherwise, the output is equal to how many 1's there are
+            circuit[node][3] = '0'
+        return circuit
+
+    # If the node is an XNOR gate output, solve and return the output
+    elif circuit[node][0] == "XNOR":
+        # Initialize a variable to zero, to count how many 1's in the terms
+        count = 0
+
+        # if there is a single 1 terminal, XNOR outputs 0. Otherwise, it outputs 1
+        for term in terminals:
+            if circuit[term][3] == '1':
+                count += 1  # For each 1 bit, add one count
+            if circuit[term][3] == "U":
+                circuit[node][3] = "U"
+                return circuit
+
+        # check how many 1's we counted
+        if count % 2 == 1:  # if more than one 1, we know it's going to be 0.
+            circuit[node][3] = '1'
+        else:  # Otherwise, the output is equal to how many 1's there are
+            circuit[node][3] = '0'
+        return circuit
+
+    # Error detection... should not be able to get at this point
+    return circuit[node][0]
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Updating the circuit dictionary with the input line, and also resetting the gates and output lines
+def inputRead(circuit, line):
+    # Checking if input bits are enough for the circuit
+    if len(line) < circuit["INPUT_WIDTH"][1]:
+        return -1
+
+    # Getting the proper number of bits:
+    line = line[(len(line) - circuit["INPUT_WIDTH"][1]):(len(line))]
+
+    # Adding the inputs to the dictionary
+    # Since the for loop will start at the most significant bit, we start at input width N
+    i = circuit["INPUT_WIDTH"][1] - 1
+    inputs = list(circuit["INPUTS"][1])
+    # dictionary item: [(bool) If accessed, (int) the value of each line, (int) layer number, (str) origin of U value]
+    for bitVal in line:
+        bitVal = bitVal.upper() # in the case user input lower-case u
+        circuit[inputs[i]][3] = bitVal # put the bit value as the line value
+        circuit[inputs[i]][2] = True  # and make it so that this line is accessed
+
+        # In case the input has an invalid character (i.e. not "0", "1" or "U"), return an error flag
+        if bitVal != "0" and bitVal != "1" and bitVal != "U":
+            return -2
+        i -= 1 # continuing the increments
+
+    return circuit
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Main Function

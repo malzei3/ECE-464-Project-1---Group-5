@@ -1,0 +1,9 @@
+# test vector file
+# for circuit.bench
+# input.txt
+# assuming INPUT ordered
+# from LSB to MSB: CBA =
+
+010
+111
+011
