@@ -2,6 +2,55 @@ from __future__ import print_function
 import os
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: the actual simulation #
+def basic_sim(circuit):
+    # QUEUE and DEQUEUE
+    # Creating a queue, using a list, containing all of the gates in the circuit
+    queue = list(circuit["GATES"][1])
+    i = 1
+
+    while True:
+        i -= 1
+        # If there's no more things in queue, done
+        if len(queue) == 0:
+            break
+
+        # Remove the first element of the queue and assign it to a variable for us to use
+        curr = queue[0]
+        queue.remove(curr)
+
+        # initialize a flag, used to check if every terminal has been accessed
+        term_has_value = True
+
+        # Check if the terminals have been accessed
+        for term in circuit[curr][1]:
+            if not circuit[term][2]:
+                term_has_value = False
+                break
+
+        if term_has_value:
+            circuit[curr][2] = True
+            circuit = gateCalc(circuit, curr)
+
+            # ERROR Detection if LOGIC does not exist
+            if isinstance(circuit, str):
+                print(circuit)
+                return circuit
+
+            print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][0] + " for:")
+            for term in circuit[curr][1]:
+                print(term + " = " + circuit[term][3])
+            print("\nPress Enter to Continue...")
+            input()
+
+        else:
+            # If the terminals have not been accessed yet, append the current node at the end of the queue
+            queue.append(curr)
+
+    return circuit
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Reading in the Circuit gate-level netlist file:
 def netRead(netName):
     # Opening the netlist file:
@@ -123,6 +172,34 @@ def netRead(netName):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Updating the circuit dictionary with the input line, and also resetting the gates and output lines
+def inputRead(circuit, line):
+    # Checking if input bits are enough for the circuit
+    if len(line) < circuit["INPUT_WIDTH"][1]:
+        return -1
+
+    # Getting the proper number of bits:
+    line = line[(len(line) - circuit["INPUT_WIDTH"][1]):(len(line))]
+
+    # Adding the inputs to the dictionary
+    # Since the for loop will start at the most significant bit, we start at input width N
+    i = circuit["INPUT_WIDTH"][1] - 1
+    inputs = list(circuit["INPUTS"][1])
+    # dictionary item: [(bool) If accessed, (int) the value of each line, (int) layer number, (str) origin of U value]
+    for bitVal in line:
+        bitVal = bitVal.upper() # in the case user input lower-case u
+        circuit[inputs[i]][3] = bitVal # put the bit value as the line value
+        circuit[inputs[i]][2] = True  # and make it so that this line is accessed
+
+        # In case the input has an invalid character (i.e. not "0", "1" or "U"), return an error flag
+        if bitVal != "0" and bitVal != "1" and bitVal != "U":
+            return -2
+        i -= 1 # continuing the increments
+
+    return circuit
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Reading in the TV file
 def tvRead(tvName):
     # Opening the tvName file:
@@ -151,9 +228,9 @@ def tvRead(tvName):
 
     return inputs
 
-# -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Generates full fault list 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Generates full fault list, Part 1 from the project
 def generateFullFaultList():
 
     i = 0 # counter used for fault generation (specifically generating the gate input faults)
@@ -218,6 +295,7 @@ def generateFullFaultList():
     #printCkt(circuit)
     print(circuit)
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Part 2 from the project
 def faultSimulation():
@@ -228,17 +306,17 @@ def faultSimulation():
 
     print("\n Reading " + BenchFile + " ... \n")
     circuit = netRead(BenchFile)
+    #basic_sim(circuit)
 
     print("\n Reading " + TestVectorFile + " ... \n")
     tests = tvRead(TestVectorFile)
 
     outputFile = open("fault_sim_result.txt", "w")
-    outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n")
+    outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n\n")
 
-
-
-
-
+    for item in tests:
+        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "-> \n\n" )
+      
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -253,9 +331,6 @@ def testVectorSetGeneration():
 
      outputFile = open(" tv_set.txt", "w")
      outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "for " + BenchFile + "\n# " + FaultListFile + "\n\n")
-
-
-
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -278,9 +353,9 @@ def SelectBenchFile():
             else:
                 return userInput
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: input fault list file (default: f_list.txt)
-
 def SelectFaultListFile():
 
     script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
@@ -300,10 +375,9 @@ def SelectFaultListFile():
             else:
                 return userInput
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION:  test vector input file (default: input.txt)
-
-
 def SelectTestVectorFile():
 
     script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
@@ -468,32 +542,6 @@ def gateCalc(circuit, node):
     # Error detection... should not be able to get at this point
     return circuit[node][0]
 
-# -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Updating the circuit dictionary with the input line, and also resetting the gates and output lines
-def inputRead(circuit, line):
-    # Checking if input bits are enough for the circuit
-    if len(line) < circuit["INPUT_WIDTH"][1]:
-        return -1
-
-    # Getting the proper number of bits:
-    line = line[(len(line) - circuit["INPUT_WIDTH"][1]):(len(line))]
-
-    # Adding the inputs to the dictionary
-    # Since the for loop will start at the most significant bit, we start at input width N
-    i = circuit["INPUT_WIDTH"][1] - 1
-    inputs = list(circuit["INPUTS"][1])
-    # dictionary item: [(bool) If accessed, (int) the value of each line, (int) layer number, (str) origin of U value]
-    for bitVal in line:
-        bitVal = bitVal.upper() # in the case user input lower-case u
-        circuit[inputs[i]][3] = bitVal # put the bit value as the line value
-        circuit[inputs[i]][2] = True  # and make it so that this line is accessed
-
-        # In case the input has an invalid character (i.e. not "0", "1" or "U"), return an error flag
-        if bitVal != "0" and bitVal != "1" and bitVal != "U":
-            return -2
-        i -= 1 # continuing the increments
-
-    return circuit
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Main Function

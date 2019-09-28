@@ -1,0 +1,11 @@
+# fault sim result
+# input: benchmarkS1.bench
+# input: f_list.txt
+# input: input.txt
+
+tv1 = 010-> 
+
+tv2 = 111-> 
+
+tv3 = 011-> 
+
