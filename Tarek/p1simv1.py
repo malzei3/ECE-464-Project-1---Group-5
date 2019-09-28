@@ -230,6 +230,36 @@ def tvRead(tvName):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Reading in the TV file
+def faultlistRead(faultName):
+    # Opening the faultName file:
+    faultFile = open(faultName, "r")
+
+    # temporary variables
+    inputs = []  # array of the faults
+
+
+    # Reading in the netlist file line by line
+    for line in faultFile:
+
+        # NOT Reading any empty lines
+        if (line == "\n"):
+            continue
+
+        # Removing spaces and newlines
+        line = line.replace(" ", "")
+        line = line.replace("\n", "")
+
+        # NOT Reading any comments
+        if (line[0] == "#"):
+            continue
+        
+        inputs.append(line)
+
+    return inputs
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Generates full fault list, Part 1 from the project
 def generateFullFaultList():
 
@@ -307,6 +337,9 @@ def faultSimulation():
     print("\n Reading " + BenchFile + " ... \n")
     circuit = netRead(BenchFile)
     #basic_sim(circuit)
+
+    print("\n Reading " + TestVectorFile + " ... \n")
+    FaultList = faultlistRead(FaultListFile)
 
     print("\n Reading " + TestVectorFile + " ... \n")
     tests = tvRead(TestVectorFile)
