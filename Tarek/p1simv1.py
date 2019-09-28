@@ -319,7 +319,8 @@ def faultSimulation():
         circuit = basic_sim(circuit)
         for curr in circuit["OUTPUTS"][1]:
             output = circuit[curr][3]
-        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n\n")
+        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n\n" + "total detected faults:\n\n" + "undetected faults:\n\n" + "fault coverage:\n")
+
 
 
 

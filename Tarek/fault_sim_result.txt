@@ -7,9 +7,24 @@
 tv1 = 010->  0  (good)
 detected:
 
+total detected faults:
+
+undetected faults:
+
+fault coverage:
 tv2 = 111->  1  (good)
 detected:
 
+total detected faults:
+
+undetected faults:
+
+fault coverage:
 tv3 = 011->  1  (good)
 detected:
 
+total detected faults:
+
+undetected faults:
+
+fault coverage:
