@@ -1,0 +1,18 @@
+# circuit.bench
+# 3 inputs
+# 1 outputs
+# 4 gates 
+
+# INPUTS:
+INPUT(A)
+INPUT(B)
+INPUT(C)
+
+# OUTPUTS:
+OUTPUT(K)
+
+# GATES:
+f = NOT(B)
+g = AND(A, B)
+h = AND(f, C)
+K = OR(g, h)

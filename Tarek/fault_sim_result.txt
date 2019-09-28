@@ -1,11 +1,15 @@
 # fault sim result
-# input: benchmarkS1.bench
+# input: circuit.bench
 # input: f_list.txt
 # input: input.txt
 
-tv1 = 010-> 
 
-tv2 = 111-> 
+tv1 = 010->  0  (good)
+detected:
 
-tv3 = 011-> 
+tv2 = 111->  1  (good)
+detected:
+
+tv3 = 011->  1  (good)
+detected:
 

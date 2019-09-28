@@ -315,7 +315,14 @@ def faultSimulation():
     outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n\n")
 
     for item in tests:
-        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "-> \n\n" )
+        circuit = inputRead(circuit, item)
+        circuit = basic_sim(circuit)
+        for curr in circuit["OUTPUTS"][1]:
+            output = circuit[curr][3]
+        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n\n")
+
+
+
       
 
 
@@ -329,7 +336,7 @@ def testVectorSetGeneration():
      print("\n Reading " + BenchFile + " ... \n")
      circuit = netRead(BenchFile)
 
-     outputFile = open(" tv_set.txt", "w")
+     outputFile = open("tv_set.txt", "w")
      outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "for " + BenchFile + "\n# " + FaultListFile + "\n\n")
 
 
@@ -345,7 +352,8 @@ def SelectBenchFile():
         print("\n Read circuit benchmark file: use " + cktFile + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
-            break
+            userInput = "circuit.bench"
+            return userInput
         else:
             cktFile = os.path.join(script_dir, userInput)
             if not os.path.isfile(cktFile):
@@ -366,8 +374,8 @@ def SelectFaultListFile():
         print("\n Read input fault list file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
-
-            break
+            userInput = "f_list.txt"
+            return userInput
         else:
             inputName = os.path.join(script_dir, userInput)
             if not os.path.isfile(inputName):
@@ -388,8 +396,8 @@ def SelectTestVectorFile():
         print("\n Read input test vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
-
-            break
+            userInput = "input.txt"
+            return userInput
         else:
             inputName = os.path.join(script_dir, userInput)
             if not os.path.isfile(inputName):
