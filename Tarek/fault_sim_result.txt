@@ -13,8 +13,8 @@ detected:
 tv3 = 011->  1  (good)
 detected:
 
-total detected faults:
+total detected faults:  0
 
-undetected faults:
+undetected faults:  5
 
-fault coverage:
+fault coverage:  0/5 = 0.0%

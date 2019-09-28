@@ -230,7 +230,7 @@ def tvRead(tvName):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Reading in the TV file
+# FUNCTION: Reading in the fault list file
 def faultlistRead(faultName):
     # Opening the faultName file:
     faultFile = open(faultName, "r")
@@ -327,7 +327,7 @@ def generateFullFaultList():
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Part 2 from the project
+# FUNCTION: Fault Simulation, Part 2 from the project
 def faultSimulation():
 
     BenchFile = SelectBenchFile()
@@ -336,10 +336,11 @@ def faultSimulation():
 
     print("\n Reading " + BenchFile + " ... \n")
     circuit = netRead(BenchFile)
-    #basic_sim(circuit)
 
-    print("\n Reading " + TestVectorFile + " ... \n")
+    print("\n Reading " + FaultListFile + " ... \n")
     FaultList = faultlistRead(FaultListFile)
+    undetectedList = FaultList
+
 
     print("\n Reading " + TestVectorFile + " ... \n")
     tests = tvRead(TestVectorFile)
@@ -354,16 +355,11 @@ def faultSimulation():
             output = circuit[curr][3]
         outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n\n")
 
-    outputFile.write("total detected faults:\n\n" + "undetected faults:\n\n" + "fault coverage:\n")
-
-
-
-
-      
+    outputFile.write("total detected faults:  " +str(len(FaultList) - len(undetectedList))+ "\n\nundetected faults:  " +str(len(undetectedList)) + "\n\nfault coverage:  " +str(len(FaultList) - len(undetectedList))+ "/" +str(len(FaultList))+ " = " + str(((len(FaultList) - len(undetectedList))/len(FaultList))*100) + "%\n")
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Part 3 from the project
+# FUNCTION: Test Vector Set Generation, Part 3 from the project
 def testVectorSetGeneration():
 
      BenchFile = SelectBenchFile()
@@ -371,6 +367,9 @@ def testVectorSetGeneration():
 
      print("\n Reading " + BenchFile + " ... \n")
      circuit = netRead(BenchFile)
+
+     print("\n Reading " + FaultListFile + " ... \n")
+     FaultList = faultlistRead(FaultListFile)
 
      outputFile = open("tv_set.txt", "w")
      outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "for " + BenchFile + "\n# " + FaultListFile + "\n\n")
