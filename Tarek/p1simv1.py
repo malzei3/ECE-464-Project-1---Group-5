@@ -1,9 +1,76 @@
 from __future__ import print_function
 import os
 
+# array of the gate inputs for part 1
+gateIn = [] 
+
+# array of the fault input 
+FaultList = [] 
+
+# array of the fault list after cleaning for easier reading 
+cleanFaultList = []
+
+# array of the undetected fault 
+undetectedList  = [] 
+
+# array of the detected fault 
+detectedList  = [] 
+
+# array of the fault circuit
+faultCircuit  = [] 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: the actual simulation #
 def basic_sim(circuit):
+    # QUEUE and DEQUEUE
+    # Creating a queue, using a list, containing all of the gates in the circuit
+    queue = list(circuit["GATES"][1])
+    i = 1
+
+    while True:
+        i -= 1
+        # If there's no more things in queue, done
+        if len(queue) == 0:
+            break
+
+        # Remove the first element of the queue and assign it to a variable for us to use
+        curr = queue[0]
+        queue.remove(curr)
+
+        # initialize a flag, used to check if every terminal has been accessed
+        term_has_value = True
+
+        # Check if the terminals have been accessed
+        for term in circuit[curr][1]:
+            if not circuit[term][2]:
+                term_has_value = False
+                break
+
+        if term_has_value:
+            circuit[curr][2] = True
+            circuit = gateCalc(circuit, curr)
+
+            # ERROR Detection if LOGIC does not exist
+            if isinstance(circuit, str):
+                print(circuit)
+                return circuit
+
+            print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][0] + " for:")
+            for term in circuit[curr][1]:
+                print(term + " = " + circuit[term][3])
+            print("\nPress Enter to Continue...")
+            input()
+
+        else:
+            # If the terminals have not been accessed yet, append the current node at the end of the queue
+            queue.append(curr)
+
+    return circuit
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: the actual simulation #
+def fault_sim(circuit):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
     queue = list(circuit["GATES"][1])
@@ -60,7 +127,6 @@ def netRead(netName):
     inputs = []  # array of the input wires
     outputs = []  # array of the output wires
     gates = []  # array of the gate list
-    gateIn = [] # array of the gate inputs
     inputBits = 0  # the number of inputs needed in this given circuit
 
     # main variable to hold the circuit netlist, this is a dictionary in Python, where:
@@ -200,6 +266,22 @@ def inputRead(circuit, line):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: to chech if there is any faults in inputs
+def inputFaultsRead():
+    global detectedList
+    global undetectedList
+
+    queue = list(faultCircuit["INPUTS"][1])
+
+    for item in queue:
+        for line in cleanFaultList:
+            if item == line[0] and faultCircuit[item][3] != line[1]:
+                   print("fault detected")
+                   detectedList.append(FaultList[cleanFaultList.index(line)])
+                   undetectedList.remove(FaultList[cleanFaultList.index(line)])
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Reading in the TV file
 def tvRead(tvName):
     # Opening the tvName file:
@@ -271,9 +353,9 @@ def generateFullFaultList():
 
     outputFile = open("full_f_list.txt", "w")
 
-    outputFile.write("Full SSA fault List" + "\n" + "\n")
+    outputFile.write("# " + cktFile + "\n# Full SSA fault List" + "\n" + "\n")
     # Creating fault list for inputs
-    for x in circuit["INPUTS"]:
+    for x in circuit["INPUTS"][1]:
         if (x[0:5] == "wire_"):
             x = x.replace("wire_", "")
             outputFile.write(x + "-SA-0" + "\n")
@@ -281,7 +363,7 @@ def generateFullFaultList():
         numFault += 1
 
     # Creating fault list for each input and outputs for all gates
-    for x in circuit["GATES"]:
+    for x in circuit["GATES"][1]:
         z = 0
         # Getting rid part of string to leave only line variable
         if (x[0:5] == "wire_"):
@@ -330,6 +412,12 @@ def generateFullFaultList():
 # FUNCTION: Fault Simulation, Part 2 from the project
 def faultSimulation():
 
+    global FaultList
+    global detectedList
+    global faultCircuit
+    global cleanFaultList
+    global undetectedList
+
     BenchFile = SelectBenchFile()
     FaultListFile = SelectFaultListFile()
     TestVectorFile = SelectTestVectorFile()
@@ -339,7 +427,6 @@ def faultSimulation():
 
     print("\n Reading " + FaultListFile + " ... \n")
     FaultList = faultlistRead(FaultListFile)
-    undetectedList = FaultList
 
 
     print("\n Reading " + TestVectorFile + " ... \n")
@@ -349,13 +436,30 @@ def faultSimulation():
     outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n\n")
 
     for item in tests:
+        undetectedList = FaultList.copy()
+        cleanFaultList = CleanFaultList(FaultList)
+
         circuit = inputRead(circuit, item)
+        faultCircuit = circuit.copy()
+        inputFaultsRead()
+
         circuit = basic_sim(circuit)
+        #faultCircuit = fault_sim(faultCircuit)
+        
+
         for curr in circuit["OUTPUTS"][1]:
             output = circuit[curr][3]
-        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n\n")
 
-    outputFile.write("total detected faults:  " +str(len(FaultList) - len(undetectedList))+ "\n\nundetected faults:  " +str(len(undetectedList)) + "\n\nfault coverage:  " +str(len(FaultList) - len(undetectedList))+ "/" +str(len(FaultList))+ " = " + str(((len(FaultList) - len(undetectedList))/len(FaultList))*100) + "%\n")
+
+        outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n")
+
+        for line in detectedList:
+            outputFile.write(line + ": " + item + " -> " + "" + "\n")
+
+        outputFile.write("\n")
+        detectedList.clear()
+
+    outputFile.write("total detected faults:  " + str(len(FaultList) - len(undetectedList))+ "\n\nundetected faults:  " +str(len(undetectedList)) + "\n\nfault coverage:  " +str(len(FaultList) - len(undetectedList))+ "/" +str(len(FaultList))+ " = " + str(int(((len(FaultList) - len(undetectedList))/len(FaultList))*100)) + "%\n")
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -439,6 +543,28 @@ def SelectTestVectorFile():
                 print("File does not exist. \n")
             else:
                 return userInput
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: to orgnize the fault list
+def CleanFaultList(fList):
+
+    templist = []
+
+    for temp in fList:
+
+        curr = temp
+        curr = temp.split("-")
+        curr[0] = "wire_" + curr[0]
+        curr.pop(1)
+
+        if len(curr) > 2:
+            curr[1] = "wire_" + curr[1]
+            curr.pop(2)
+
+        templist.append(curr)
+
+    return templist
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

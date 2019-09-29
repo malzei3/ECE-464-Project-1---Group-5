@@ -6,15 +6,18 @@
 
 tv1 = 010->  0  (good)
 detected:
+A-SA-1: 010 -> 
 
 tv2 = 111->  1  (good)
 detected:
+A-SA-0: 111 -> 
 
 tv3 = 011->  1  (good)
 detected:
+A-SA-0: 011 -> 
 
-total detected faults:  0
+total detected faults:  1
 
-undetected faults:  5
+undetected faults:  4
 
-fault coverage:  0/5 = 0.0%
+fault coverage:  1/5 = 20%
