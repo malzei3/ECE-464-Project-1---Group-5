@@ -1,5 +1,7 @@
 from __future__ import print_function
 import os
+# importing "copy" for copy operations 
+import copy 
 
 # array of the gate inputs for part 1
 gateIn = [] 
@@ -270,6 +272,10 @@ def inputRead(circuit, line):
 def inputFaultsRead():
     global detectedList
     global undetectedList
+    global faultCircuit
+
+    faultCircuitCopy = copy.deepcopy(faultCircuit)
+
 
     queue = list(faultCircuit["INPUTS"][1])
 
@@ -278,7 +284,12 @@ def inputFaultsRead():
             if item == line[0] and faultCircuit[item][3] != line[1]:
                    print("fault detected")
                    detectedList.append(FaultList[cleanFaultList.index(line)])
-                   undetectedList.remove(FaultList[cleanFaultList.index(line)])
+                   if FaultList[cleanFaultList.index(line)] in undetectedList:
+                       undetectedList.remove(FaultList[cleanFaultList.index(line)])
+                   faultCircuitCopy[item][3] = line[1]
+
+    faultCircuit = copy.deepcopy(faultCircuitCopy)
+
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -428,6 +439,8 @@ def faultSimulation():
     print("\n Reading " + FaultListFile + " ... \n")
     FaultList = faultlistRead(FaultListFile)
 
+    undetectedList = copy.copy(FaultList)
+    cleanFaultList = CleanFaultList(FaultList)
 
     print("\n Reading " + TestVectorFile + " ... \n")
     tests = tvRead(TestVectorFile)
@@ -436,15 +449,13 @@ def faultSimulation():
     outputFile.write("# fault sim result\n" + "# input: " + BenchFile + "\n# input: " + FaultListFile + "\n# input: " + TestVectorFile + "\n\n\n")
 
     for item in tests:
-        undetectedList = FaultList.copy()
-        cleanFaultList = CleanFaultList(FaultList)
 
         circuit = inputRead(circuit, item)
-        faultCircuit = circuit.copy()
+        faultCircuit = copy.deepcopy(circuit)
         inputFaultsRead()
 
         circuit = basic_sim(circuit)
-        #faultCircuit = fault_sim(faultCircuit)
+        faultCircuit = fault_sim(faultCircuit)
         
 
         for curr in circuit["OUTPUTS"][1]:
@@ -454,7 +465,11 @@ def faultSimulation():
         outputFile.write("tv" + str(tests.index(item) + 1) + " = " + item + "->  " + str(output) + "  (good)\n" + "detected:\n")
 
         for line in detectedList:
-            outputFile.write(line + ": " + item + " -> " + "" + "\n")
+
+            for curr in faultCircuit["OUTPUTS"][1]:
+                output = faultCircuit[curr][3]
+
+            outputFile.write(line + ": " + item + " -> " + output + "\n")
 
         outputFile.write("\n")
         detectedList.clear()
@@ -740,4 +755,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
