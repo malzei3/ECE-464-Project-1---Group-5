@@ -151,9 +151,9 @@ def netRead(netName):
     print(circuit["OUTPUTS"])
     print(circuit["GATES"])
 
-# -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Generates full fault list (put this in its own function call?)
-# Still need ask user for a fault list output file
+    # -------------------------------------------------------------------------------------------------------------------- #
+    # FUNCTION: Generates full fault list (put this in its own function call?)
+    # Still need ask user for a fault list output file
     outputFile = open("full_f_list.txt", "w")
 
     outputFile.write("#  Full SSA fault List" + "\n" + "\n")
@@ -200,7 +200,7 @@ def netRead(netName):
     outputFile.write("\n" + "# Total Fault: " + str(numFault))
 
     outputFile.close()
-# -------------------------------------------------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------------------------------------------------- #
     return circuit
 
 
@@ -431,6 +431,7 @@ def basic_sim(circuit):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: reads the input faults that need to be tested
 def faultRead(faultFile):
     # opening list of faults to check
     faultHere = []
@@ -458,7 +459,8 @@ def faultRead(faultFile):
             line = line.replace("-IN-", "")
             line = line.replace("-SA-", "")
             inputF.append(line)
-
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Detects if the f_list faults actually exist in the possible full fault list (if not EXIT)
     for line in faultExist:
 
         # NOT Reading any empty lines
@@ -482,7 +484,7 @@ def faultRead(faultFile):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: The Fault Sim
+# FUNCTION: The Fault Simulator runs the circuit with SA-1/0 faults runs through ALL FAULTS
 def fault_sim(circuit):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
@@ -531,19 +533,18 @@ def fault_sim(circuit):
                     else:
                         circuit = gateCalc(circuit, curr)
 
-
                 # ERROR Detection if LOGIC does not exist
                 if isinstance(circuit, str):
                     print(circuit)
                     return circuit
 
-                #Uncomment for debugging purposes (step by step)
-                #print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
+                # Uncomment for debugging purposes (step by step)
+                # print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
                 #    0] + " for:")
-                #for term in circuit[curr][1]:
+                # for term in circuit[curr][1]:
                 #    print(term + " = " + circuit[term][3])
-                #print("\nPress Enter to Continue...")
-                #input()
+                # print("\nPress Enter to Continue...")
+                # input()
 
             else:
                 # If the terminals have not been accessed yet, append the current node at the end of the queue
@@ -554,18 +555,18 @@ def fault_sim(circuit):
                 break
             faultOutput.append(str(circuit[y][3]) + foutput)
         circuit = copy.deepcopy(faultCirc)
-
+    # Uncomment to see fault sim results for each fault input (Match arrays together)
+    #print(faultItem)
+    #print(faultOutput)
+    
     return circuit
-
 
 # FUNCTION: Main Function
 def main():
     # **************************************************************************************************************** #
     # NOTE: UI code; Does not contain anything about the actual simulation
-
     # Used for file access
     script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-
     print("Circuit Simulator:")
 
     # Select circuit benchmark file, default is circuit.bench
@@ -581,6 +582,7 @@ def main():
                 print("File does not exist. \n")
             else:
                 break
+    # Select input fault file, default is f_list.txt
     while True:
         faultyCkt = "f_list.txt"
         print("\n Read circuit fault list file: use " + faultyCkt + "?" + " Enter to accept or type filename: ")
@@ -594,16 +596,15 @@ def main():
             else:
                 break
 
-    faultRead(faultyCkt)
-
     print("\n Reading " + cktFile + " ... \n")
     circuit = netRead(cktFile)
+    faultRead(faultyCkt)
     print("\n Finished processing benchmark file and built netlist dictionary: \n")
     # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
     # printCkt(circuit)
     print(circuit)
 
-    # keep an initial (unassigned any value) copy of the circuit for an easy reset
+    # keep an initial (unassigned any value) copy of the circuit for an easy reset (DOESN'T WORK is a pointer)
     newCircuit = circuit
 
     # Select input file, default is input.txt
@@ -612,7 +613,6 @@ def main():
         print("\n Read input vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
-
             break
         else:
             inputName = os.path.join(script_dir, userInput)
@@ -642,6 +642,7 @@ def main():
     faultFound = []
     faultDetected = []
     faultUndetected = []
+
     outputFile.write("# fault sim result" + "\n")
     outputFile.write("# input: " + cktFile + "\n")
     outputFile.write("# input: " + inputName + "\n")
@@ -731,6 +732,7 @@ def main():
 
         print("\n*******************\n")
 
+    # Creates total faults detected and undetected
     for x in faultItem:
         if x not in faultFound:
             faultUndetected.append(x)
@@ -747,7 +749,7 @@ def main():
         outputFile.write(x + "\n")
 
     outputFile.write("\n" + "Fault Coverage: " + str(len(faultDetected)) + "/" + str(len(faultItem)) + " = " +
-                     str(len(faultDetected)/len(faultItem) * 100) + "%")
+                     str(len(faultDetected) / len(faultItem) * 100) + "%")
 
     outputFile.close
     # exit()
