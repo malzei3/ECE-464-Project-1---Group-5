@@ -1,0 +1,19 @@
+# Test vector set that can cover > 90% of the faults
+# for circuit.bench
+# f_list.txt
+
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000

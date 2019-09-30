@@ -1,5 +1,4 @@
-#circuit.bench
-# Full SSA fault List
+#  Full SSA fault List
 
 A-SA-0
 A-SA-1
@@ -9,25 +8,25 @@ C-SA-0
 C-SA-1
 f-SA-0
 f-SA-1
-B-in-f-SA-0
-B-in-f-SA-1
+B-IN-f-SA-0
+B-IN-f-SA-1
 g-SA-0
 g-SA-1
-g-in-A-SA-0
-g-in-A-SA-1
-g-in-B-SA-0
-g-in-B-SA-1
+g-IN-A-SA-0
+g-IN-A-SA-1
+g-IN-B-SA-0
+g-IN-B-SA-1
 h-SA-0
 h-SA-1
-h-in-f-SA-0
-h-in-f-SA-1
-h-in-C-SA-0
-h-in-C-SA-1
+h-IN-f-SA-0
+h-IN-f-SA-1
+h-IN-C-SA-0
+h-IN-C-SA-1
 K-SA-0
 K-SA-1
-K-in-g-SA-0
-K-in-g-SA-1
-K-in-h-SA-0
-K-in-h-SA-1
+K-IN-g-SA-0
+K-IN-g-SA-1
+K-IN-h-SA-0
+K-IN-h-SA-1
 
-Total Fault: 28
+# Total Fault: 28

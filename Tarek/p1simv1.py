@@ -21,6 +21,9 @@ detectedList  = []
 # array of the fault circuit
 faultCircuit  = [] 
 
+# array contains only the gates' faults 
+onlyGatesFaults = []
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: the actual simulation #
 def basic_sim(circuit):
@@ -71,8 +74,8 @@ def basic_sim(circuit):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: the actual simulation #
-def fault_sim(circuit):
+# FUNCTION: sim for part 3 without print message.
+def part3_basic_sim(circuit):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
     queue = list(circuit["GATES"][1])
@@ -106,11 +109,69 @@ def fault_sim(circuit):
                 print(circuit)
                 return circuit
 
-            print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][0] + " for:")
-            for term in circuit[curr][1]:
-                print(term + " = " + circuit[term][3])
-            print("\nPress Enter to Continue...")
-            input()
+        else:
+            # If the terminals have not been accessed yet, append the current node at the end of the queue
+            queue.append(curr)
+
+    return circuit
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: to make a list of only gates faults
+def OnlyGatesFaults():
+    global onlyGatesFaults
+
+    onlyGatesFaults = copy.copy(cleanFaultList)
+
+    queue = list(faultCircuit["INPUTS"][1])
+
+    for line in cleanFaultList:
+        if line[0] in queue:
+                onlyGatesFaults.remove(line)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: the actual simulation #
+def fault_sim(circuit):
+
+    # QUEUE and DEQUEUE
+    # Creating a queue, using a list, containing all of the gates in the circuit
+    queue = list(circuit["GATES"][1])
+    i = 1
+
+    while True:
+        i -= 1
+        # If there's no more things in queue, done
+        if len(queue) == 0:
+            break
+
+        # Remove the first element of the queue and assign it to a variable for us to use
+        curr = queue[0]
+        queue.remove(curr)
+
+        # initialize a flag, used to check if every terminal has been accessed
+        term_has_value = True
+
+        # Check if the terminals have been accessed
+        for term in circuit[curr][1]:
+            if not circuit[term][2]:
+                term_has_value = False
+                break
+
+        if term_has_value:
+            circuit[curr][2] = True
+            circuit = gateCalc(circuit, curr)
+
+            # ERROR Detection if LOGIC does not exist
+            if isinstance(circuit, str):
+                print(circuit)
+                return circuit
+
+            #print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][0] + " for:")
+            #for term in circuit[curr][1]:
+            #    print(term + " = " + circuit[term][3])
+            #print("\nPress Enter to Continue...")
+            #input()
 
         else:
             # If the terminals have not been accessed yet, append the current node at the end of the queue
@@ -291,7 +352,6 @@ def inputFaultsRead():
     faultCircuit = copy.deepcopy(faultCircuitCopy)
 
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Reading in the TV file
 def tvRead(tvName):
@@ -454,8 +514,8 @@ def faultSimulation():
         faultCircuit = copy.deepcopy(circuit)
         inputFaultsRead()
 
-        circuit = basic_sim(circuit)
-        faultCircuit = fault_sim(faultCircuit)
+        circuit = copy.deepcopy(basic_sim(circuit))
+        faultCircuit = copy.copy(fault_sim(faultCircuit))
         
 
         for curr in circuit["OUTPUTS"][1]:
@@ -478,22 +538,88 @@ def faultSimulation():
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: Precentage calculator for part 3
+def faultsCalc(_circuit, _FaultList, _tests):
+
+    global FaultList
+    global detectedList
+    global faultCircuit
+    global cleanFaultList
+    global undetectedList
+
+    circuit = copy.deepcopy(_circuit)
+
+    FaultList = copy.copy(_FaultList)
+
+    undetectedList = copy.copy(FaultList)
+    cleanFaultList = CleanFaultList(FaultList)
+    
+    tests = tvRead(_tests)
+
+    for item in tests:
+
+        circuit = inputRead(circuit, item)
+        faultCircuit = copy.deepcopy(circuit)
+        inputFaultsRead()
+
+        circuit = copy.deepcopy(part3_basic_sim(circuit))
+        faultCircuit = copy.copy(fault_sim(faultCircuit))
+       
+
+        detectedList.clear()
+
+    _faultsCalc = str(int(((len(FaultList) - len(undetectedList))/len(FaultList))*100))
+    
+    return _faultsCalc
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Test Vector Set Generation, Part 3 from the project
 def testVectorSetGeneration():
 
-     BenchFile = SelectBenchFile()
-     FaultListFile = SelectFaultListFile()
+     BenchFile_ = SelectBenchFile()
+     FaultListFile_ = SelectFaultListFile()
 
-     print("\n Reading " + BenchFile + " ... \n")
-     circuit = netRead(BenchFile)
+     print("\n Reading " + BenchFile_ + " ... \n")
+     circuit_ = netRead(BenchFile_)
 
-     print("\n Reading " + FaultListFile + " ... \n")
-     FaultList = faultlistRead(FaultListFile)
+     print("\n Reading " + FaultListFile_ + " ... \n")
+     FaultList_ = faultlistRead(FaultListFile_)
 
      outputFile = open("tv_set.txt", "w")
-     outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "for " + BenchFile + "\n# " + FaultListFile + "\n\n")
+
+     var = '0'
+     numberOfInputs = len(circuit_["INPUTS"][1])
+
+     while True: 
+         var = var + '0'
+         if len(var) == numberOfInputs:
+             break
+
+     results = 0
+
+     outputFile.write("# Test vector set that can cover > 90% of the faults\n" + "# for " + BenchFile_ + "\n# " + FaultListFile_ + "\n\n")
+     outputFile.write(var + "\n")
+     outputFile.close()
+
+     while True:
+
+        results =  faultsCalc(circuit_, FaultList_, "tv_set.txt")
+
+        if int(results) < 90:
+            outputFile = open("tv_set.txt", "a")
+            if '0' in var:
+                var.replace("0", "1")
+                outputFile.write(var + "\n")
+                outputFile.close()
+        else:
+            break
 
 
+     
+
+
+     
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: read input bench file
 def SelectBenchFile():
@@ -736,8 +862,17 @@ def main():
     # Used for file access
 
     while True:
+
         print("Enter what do want to do: ", "1. Generate Full Fault List","2. Fault Simulation","3. Test Vector Set Generation","4. Exit", sep="\n")
-        menu = int(input())
+        
+        while True:
+            Input = input()
+            if Input != '1' and Input != '2' and Input != '3' and Input != '4' :
+                print("\n\nPlease Enter a valid input!!!\n\n")
+            else:
+                break
+
+        menu = int(Input)
 
         if menu == 1:
             generateFullFaultList()
@@ -751,7 +886,7 @@ def main():
         elif menu == 4:
             break
         else:
-            print("Please Enter a Valid Input!!")
+            print("\n\nPlease Enter a valid input!!!\n\n")
 
 
 if __name__ == "__main__":
