@@ -608,15 +608,35 @@ def testVectorSetGeneration():
 
         if int(results) < 90:
             outputFile = open("tv_set.txt", "a")
-            if '0' in var:
-                var.replace("0", "1")
-                outputFile.write(var + "\n")
-                outputFile.close()
+            var = shiftBin(var, numberOfInputs)
+            if len(var) > numberOfInputs:
+                print("\n"+results+" this is the max\nPress enter to continue...")
+                input()
+                break
+            outputFile.write(var + "\n")
+            outputFile.close()
         else:
             break
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: function to shifts a binary string and returns binary stirng
+def shiftBin(number, numberOfinputs):
 
-     
+    x = number
+    nIN = numberOfinputs
+    x = int(x, 2) + 1
+    x = str(bin(x))
+    x = x.replace('0b', '', 2)
+    if len(x) < nIN:
+        while True: 
+         x = '0' + x
+         if len(x) == nIN:
+             break
+
+    return x
+
+
+
 
 
      
