@@ -15,3 +15,14 @@ A-SA-0: 111 -> 0
 tv1 = 011 -> 1 (good)
 detected:
 A-SA-0: 011 -> 0
+
+Total detected faults: 3
+A-SA-0
+A-SA-1
+h-SA-1
+
+Total undetected faults: 2
+g-IN-B-SA-1
+f-SA-1
+
+Fault Coverage: 3/5 = 60.0%
