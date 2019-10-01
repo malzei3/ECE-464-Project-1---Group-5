@@ -527,10 +527,13 @@ def fault_sim(circuit):
                     faultWire = "wire_" + wireName
                     inputs = list(circuit["INPUTS"][1])
 
+                    #RUNS through faults (first section does input faults and output faults)
                     for w in inputs:
                         if w == faultWire:
                             if len(x) == 2:
                                 circuit[w][3] = x[1]
+
+                    #Faults that are gate inputs
                     if curr == faultWire:
                         if len(x) == 2:
                             circuit[curr][3] = x[1]
@@ -545,13 +548,13 @@ def fault_sim(circuit):
                     print(circuit)
                     return circuit
 
-                 #Uncomment for debugging purposes (step by step)
+                #Uncomment for debugging purposes (step by step)
                 #print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
                 #    0] + " for:")
-                ##for term in circuit[curr][1]:
-                 #   print(term + " = " + circuit[term][3])
-                 #   print("\nPress Enter to Continue...")
-                 #   input()
+                #for term in circuit[curr][1]:
+                #   print(term + " = " + circuit[term][3])
+                #   print("\nPress Enter to Continue...")
+                #   input()
 
             else:
                 # If the terminals have not been accessed yet, append the current node at the end of the queue
