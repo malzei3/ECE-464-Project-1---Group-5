@@ -177,7 +177,7 @@ def netRead(netName):
             y = str(gateIn[i])
             y = y.replace("['", "")
             y = y.replace("']", "")
-            y = y.replace("', '", "")
+            y = y.split("', '")
             inputNum = (len(y))  # number of variables to consider when going through str
             numFault += 1
             numFault = numFault + inputNum
@@ -185,7 +185,7 @@ def netRead(netName):
             # Taking each input variable and putting it into a SA-0 and SA-1 per gate
             if inputNum > 1:
                 while inputNum >= 1:
-                    gateVar = y[z]
+                    gateVar = y[inputNum-1]
                     inputNum -= 1
                     outputFile.write(x + "-IN-" + gateVar + "-SA-0" + "\n")
                     outputFile.write(x + "-IN-" + gateVar + "-SA-1" + "\n")
@@ -193,8 +193,8 @@ def netRead(netName):
 
             else:
                 # If there is only 1 input for gate just put it in SA-1 and SA-0
-                outputFile.write(y + "-IN-" + x + "-SA-0" + "\n")
-                outputFile.write(y + "-IN-" + x + "-SA-1" + "\n")
+                outputFile.write(y[0] + "-IN-" + x + "-SA-0" + "\n")
+                outputFile.write(y[0] + "-IN-" + x + "-SA-1" + "\n")
             i += 1
     numFault = numFault * 2  # multiply by 2 for 2 different fault states
     outputFile.write("\n" + "# Total Fault: " + str(numFault))
@@ -416,12 +416,12 @@ def basic_sim(circuit):
                 print(circuit)
                 return circuit
 
-            print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
-                0] + " for:")
-            for term in circuit[curr][1]:
-                print(term + " = " + circuit[term][3])
-            print("\nPress Enter to Continue...")
-            input()
+            #print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
+            #    0] + " for:")
+            #for term in circuit[curr][1]:
+            #    print(term + " = " + circuit[term][3])
+            #print("\nPress Enter to Continue...")
+            #input()
 
         else:
             # If the terminals have not been accessed yet, append the current node at the end of the queue
@@ -451,16 +451,18 @@ def faultRead(faultFile):
         if (line[0] == "#"):
             continue
         faultItem.append(line)
-        if (line[1:5] == "-SA-"):
-            line = line.replace("-SA-", "")
+        if "-SA-" in line:
+            if "-IN-" not in line:
+                line = line.replace("-SA-", "/")
+                inputF.append(line)
+
+        if "-IN-" in line:
+            line = line.replace("-IN-", "/")
+            line = line.replace("-SA-", "/")
             inputF.append(line)
 
-        if (line[1:5] == "-IN-"):
-            line = line.replace("-IN-", "")
-            line = line.replace("-SA-", "")
-            inputF.append(line)
-# -------------------------------------------------------------------------------------------------------------------- #
-# FUNCTION: Detects if the f_list faults actually exist in the possible full fault list (if not EXIT)
+    # -------------------------------------------------------------------------------------------------------------------- #
+    # FUNCTION: Detects if the f_list faults actually exist in the possible full fault list (if not EXIT)
     for line in faultExist:
 
         # NOT Reading any empty lines
@@ -488,10 +490,12 @@ def faultRead(faultFile):
 def fault_sim(circuit):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
-    z = 0
     faultCirc = copy.deepcopy(circuit)
+
     foutput = ""
     for x in inputF:
+        x = x.split("/")
+
         queue = list(circuit["GATES"][1])
         i = 1
 
@@ -510,6 +514,7 @@ def fault_sim(circuit):
 
             # Check if the terminals have been accessed
             for term in circuit[curr][1]:
+
                 if not circuit[term][2]:
                     term_has_value = False
                     break
@@ -521,11 +526,13 @@ def fault_sim(circuit):
                     wireName = x[0]
                     faultWire = "wire_" + wireName
                     inputs = list(circuit["INPUTS"][1])
+
                     for w in inputs:
                         if w == faultWire:
-                            circuit[w][3] = x[1]
+                            if len(x) == 2:
+                                circuit[w][3] = x[1]
                     if curr == faultWire:
-                        if x[1] == '1' or x[1] == '0':
+                        if len(x) == 2:
                             circuit[curr][3] = x[1]
                         elif term == "wire_" + x[1]:
                             circuit[term][3] = x[2]
@@ -538,13 +545,13 @@ def fault_sim(circuit):
                     print(circuit)
                     return circuit
 
-                # Uncomment for debugging purposes (step by step)
-                # print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
+                 #Uncomment for debugging purposes (step by step)
+                #print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][
                 #    0] + " for:")
-                # for term in circuit[curr][1]:
-                #    print(term + " = " + circuit[term][3])
-                # print("\nPress Enter to Continue...")
-                # input()
+                ##for term in circuit[curr][1]:
+                 #   print(term + " = " + circuit[term][3])
+                 #   print("\nPress Enter to Continue...")
+                 #   input()
 
             else:
                 # If the terminals have not been accessed yet, append the current node at the end of the queue
@@ -553,13 +560,16 @@ def fault_sim(circuit):
             if not circuit[y][2]:
                 foutput = "NETLIST ERROR: OUTPUT LINE \"" + y + "\" NOT ACCESSED"
                 break
-            faultOutput.append(str(circuit[y][3]) + foutput)
+            foutput = str(circuit[y][3]) + foutput
+        faultOutput.append(foutput)
+        foutput = ""
         circuit = copy.deepcopy(faultCirc)
     # Uncomment to see fault sim results for each fault input (Match arrays together)
-    #print(faultItem)
-    #print(faultOutput)
-    
+    # print(faultItem)
+    # print(faultOutput)
+
     return circuit
+
 
 # FUNCTION: Main Function
 def main():
