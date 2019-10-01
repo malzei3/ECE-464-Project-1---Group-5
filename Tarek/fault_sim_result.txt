@@ -1,0 +1,24 @@
+# fault sim result
+# input: circuit.bench
+# input: f_list.txt
+# input: input.txt
+
+
+tv1 = 010->  0  (good)
+detected:
+A123-SA-1: 010 -> 1
+h123-SA-1: 010 -> 1
+
+tv2 = 111->  1  (good)
+detected:
+A123-SA-0: 111 -> 0
+
+tv3 = 011->  1  (good)
+detected:
+A123-SA-0: 011 -> 0
+
+total detected faults:  3
+
+undetected faults:  2
+
+fault coverage:  3/5 = 60%
