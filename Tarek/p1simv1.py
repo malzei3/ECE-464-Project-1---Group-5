@@ -212,7 +212,9 @@ def fault_sim(circuit):
             if not circuit[y][2]:
                 foutput = "NETLIST ERROR: OUTPUT LINE \"" + y + "\" NOT ACCESSED"
                 break
-            faultOutput.append(str(circuit[y][3]) + foutput)
+            foutput = str(circuit[y][3]) + foutput
+        faultOutput.append(foutput)
+        foutput =""
 
 
         circuit = copy.deepcopy(faultCirc)
@@ -636,11 +638,11 @@ def testVectorSetGeneration():
 
         results =  faultsCalc(circuit_, FaultList_, "tv_set.txt")
 
-        if int(results) < 90:
+        if int(results) <= 90:
             outputFile = open("tv_set.txt", "a")
             var = shiftBin(var, numberOfInputs)
             if len(var) > numberOfInputs:
-                print("\n"+results+" this is the max\nPress enter to continue...")
+                print("\nNo tests been founds to cover 90%")
                 input()
                 break
             outputFile.write(var + "\n")
