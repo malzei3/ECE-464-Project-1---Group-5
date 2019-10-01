@@ -2,8 +2,8 @@
 # for circuit.bench
 # f_list.txt
 
-A-SA-0
-A-SA-1
-g-IN-B-SA-1
-f-SA-1
-h-SA-1
+A123-SA-0
+A123-SA-1
+g123-IN-B-SA-1
+f123-SA-1
+h123-SA-1

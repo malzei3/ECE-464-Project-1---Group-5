@@ -4,15 +4,15 @@
 # 4 gates 
 
 # INPUTS:
-INPUT(A)
-INPUT(B)
-INPUT(C)
+INPUT(A123)
+INPUT(B123)
+INPUT(C123)
 
 # OUTPUTS:
-OUTPUT(K)
+OUTPUT(K123)
 
 # GATES:
-f = NOT(B)
-g = AND(A, B)
-h = AND(f, C)
-K = OR(g, h)
+f123 = NOT(B123)
+g123 = AND(A123, B123)
+h123 = AND(f123, C123)
+K123 = OR(g123, h123)

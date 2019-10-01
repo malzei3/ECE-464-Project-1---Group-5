@@ -1,32 +1,33 @@
-#  Full SSA fault List
+# circuit.bench
+# Full SSA fault List
 
-A-SA-0
-A-SA-1
-B-SA-0
-B-SA-1
-C-SA-0
-C-SA-1
-f-SA-0
-f-SA-1
-B-IN-f-SA-0
-B-IN-f-SA-1
-g-SA-0
-g-SA-1
-g-IN-A-SA-0
-g-IN-A-SA-1
-g-IN-B-SA-0
-g-IN-B-SA-1
-h-SA-0
-h-SA-1
-h-IN-f-SA-0
-h-IN-f-SA-1
-h-IN-C-SA-0
-h-IN-C-SA-1
-K-SA-0
-K-SA-1
-K-IN-g-SA-0
-K-IN-g-SA-1
-K-IN-h-SA-0
-K-IN-h-SA-1
+A123-SA-0
+A123-SA-1
+B123-SA-0
+B123-SA-1
+C123-SA-0
+C123-SA-1
+wire_f123-SA-0
+wire_f123-SA-1
+wire_f123-IN-wire_B123-SA-0
+wire_f123-IN-wire_B123-SA-0
+wire_g123-SA-0
+wire_g123-SA-1
+wire_g123-IN-wire_A123-SA-0
+wire_g123-IN-wire_A123-SA-0
+wire_g123-IN-wire_B123-SA-0
+wire_g123-IN-wire_B123-SA-0
+wire_h123-SA-0
+wire_h123-SA-1
+wire_h123-IN-wire_f123-SA-0
+wire_h123-IN-wire_f123-SA-0
+wire_h123-IN-wire_C123-SA-0
+wire_h123-IN-wire_C123-SA-0
+wire_K123-SA-0
+wire_K123-SA-1
+wire_K123-IN-wire_g123-SA-0
+wire_K123-IN-wire_g123-SA-0
+wire_K123-IN-wire_h123-SA-0
+wire_K123-IN-wire_h123-SA-0
 
-# Total Fault: 28
+Total Fault: 28
